@@ -6,7 +6,6 @@ var player = document.getElementById("Player")
 var actualX = 0
 var actualY = 240 -70
 var vel = -3
-var hit = false
 var dead = false
 
 //paredes
@@ -16,25 +15,26 @@ var wallBottom = document.getElementById("wallBottom")
 //Geração de tubos
 var min = 160; // Valor mínimo
 var max = 370; // Valor máximo
-var dificulty = 2000 //frequnecia em que eles vão aparecer
-dist = 120
+var dificulty = 700 //frequnecia em que eles vão aparecer
+var dist = 120 //distância entre os tubos
+var clicked = false // para não permitir que a tehla de pular seja segurada
 
 //Pontuação
 var pointsText = document.getElementById("Points")
 var points = 0
 
 document.addEventListener("keydown", jump)
+document.addEventListener("keyup", function(event){clicked = false})
 
 setInterval(gravity, 10)
 setInterval(spawnTubes, 1000)
 setInterval(checkDeath, 100)
 
-
 function jump(event){
-    if (!dead) {
+    if (!dead && !clicked) {
         vel = -3
+        clicked = true
     }
-    
 }
 
 function gravity(){
@@ -71,19 +71,18 @@ function increase(){
 
 function checkDeath() {
     var tubes = document.querySelectorAll(".tube")
-    tubes.forEach(function(tube){colision(tube)})
-    colision(wallTop)
-    colision(wallBottom)
+    tubes.forEach(function(tube){if(colision(player, tube)){death()}})
+    if(colision(player, wallTop)){death()}
+    if(colision(player, wallBottom)){death()}
 }
 
-function colision(obj) {
-    var playerRect = player.getBoundingClientRect()
-    var objRect = obj.getBoundingClientRect()
-    hit = !(playerRect.right < objRect.left || playerRect.left > objRect.right || playerRect.bottom < objRect.top || playerRect.top > objRect.bottom);
-    if (hit == true){
-        death()
-    }
+function colision(obj1, obj2) {
+    var obj1Rect = obj1.getBoundingClientRect()
+    var obj2Rect = obj2.getBoundingClientRect()
+    hit = !(obj1Rect.right < obj2Rect.left || obj1Rect.left > obj2Rect.right || obj1Rect.bottom < obj2Rect.top || obj1Rect.top > obj2Rect.bottom);
+    return hit
 }
+
 function death(){
     var tubes = document.querySelectorAll(".tube")
     tubes.forEach(function(tube){tube.classList.add("stopTube")})
@@ -93,5 +92,4 @@ function death(){
         playArea.append(deathText)
     }
     dead = true
-    
 }
